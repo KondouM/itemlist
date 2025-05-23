@@ -161,15 +161,54 @@ export default function Home() {
             const stats = item["要求ステータス"];
             return (
               <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <h2 className={`text-2xl font-bold mb-3 ${info["ドロップレベル"] >= 1000 ? 'text-red-600' : 'text-gray-800'}`}>
+                <h2 className={`text-2xl font-bold mb-4 ${info["ドロップレベル"] >= 1000 ? 'text-red-600' : 'text-gray-800'}`}>
                   {cleanItemName(info["名前"])}
                 </h2>
-                <div className="grid grid-cols-2 gap-4 text-gray-700">
-                  <p>ダメージ: {info["最小ダメージ"]} - {info["最大ダメージ"]}</p>
-                  <p>価格: {info["価格"]} G</p>
-                  <p>ドロップレベル: {info["ドロップレベル"]}</p>
-                  <p>必要レベル: {stats["レベル"]}</p>
-                  <p>必要力: {stats["力"]}</p>
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <div className="grid grid-cols-2 gap-3 text-gray-700">
+                    <p>ダメージ: {info["最小ダメージ"]} - {info["最大ダメージ"]}</p>
+                    <p>価格: {info["価格"]} G</p>
+                    <p>ドロップレベル: {info["ドロップレベル"]}</p>
+                    <p>必要レベル: {stats["レベル"]}</p>
+                    <p>攻撃範囲: {info["攻撃範囲"]}</p>
+                    <p>攻撃速度: {info["攻撃速度"]}</p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <span className="w-1 h-6 bg-blue-500 rounded-full mr-2"></span>
+                    要求ステータス
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 text-gray-700 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-medium">力</span>
+                      <span className="text-gray-900">{stats["力"]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-medium">敏捷</span>
+                      <span className="text-gray-900">{stats["敏捷"]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-medium">健康</span>
+                      <span className="text-gray-900">{stats["健康"]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-medium">知恵</span>
+                      <span className="text-gray-900">{stats["知恵"]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-medium">知識</span>
+                      <span className="text-gray-900">{stats["知識"]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-medium">カリスマ</span>
+                      <span className="text-gray-900">{stats["カリスマ"]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-medium">運</span>
+                      <span className="text-gray-900">{stats["運"]}</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">アイテム情報</h3>
