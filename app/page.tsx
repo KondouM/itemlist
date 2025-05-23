@@ -7,6 +7,8 @@ interface ItemInfo {
   シリアル: number;
   最小ダメージ: number;
   最大ダメージ: number;
+  攻撃範囲: string;
+  攻撃速度: string;
   価格: number;
   ドロップレベル: number;
 }
@@ -14,6 +16,12 @@ interface ItemInfo {
 interface ItemStats {
   レベル: number;
   力: number;
+  敏捷: number;
+  健康: number;
+  知恵: number;
+  知識: number;
+  カリスマ: number;
+  運: number;
 }
 
 interface Item {
