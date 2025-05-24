@@ -52,10 +52,23 @@ export default function Home() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [showNews, setShowNews] = useState(false);
   const [news, setNews] = useState<{ date: string; content: string }[]>([]);
+  const [showDiff, setShowDiff] = useState(false);
+  const [diffContent, setDiffContent] = useState<string>('');
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowDiff(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, []);
 
   useEffect(() => {
     // アイテムデータの読み込み
@@ -114,12 +127,6 @@ export default function Home() {
   const filteredItems = items.filter(item => {
     const info = item["基本情報"];
     return cleanItemName(info["名前"]).includes(query);
-  });
-
-  const sortedAndFilteredItems = filteredItems.sort((a, b) => {
-    const levelA = a["基本情報"]["ドロップレベル"];
-    const levelB = b["基本情報"]["ドロップレベル"];
-    return sortOrder === 'asc' ? levelA - levelB : levelB - levelA;
   });
 
   return (
@@ -203,19 +210,76 @@ export default function Home() {
                 </div>
               )}
             </div>
-            <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
-            >
-              <span>ドロップレベル</span>
-              <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  setLoading(true);
+                  fetch('/diff_names.txt')
+                    .then(res => {
+                      if (!res.ok) throw new Error('変更内容の読み込みに失敗しました');
+                      return res.arrayBuffer();
+                    })
+                    .then(buffer => {
+                      const sjisText = sjisToUtf8(new Uint8Array(buffer));
+                      // 各行の先頭に・を追加
+                      const formattedText = sjisText
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0)
+                        .map(line => `・${line}`)
+                        .join('\n');
+                      setDiffContent(formattedText);
+                      setShowDiff(true);
+                    })
+                    .catch(err => {
+                      console.error('エラー:', err);
+                      setError(err.message);
+                    })
+                    .finally(() => {
+                      setLoading(false);
+                    });
+                }}
+                className="px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors flex items-center gap-1.5"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                変更アイテム
+              </button>
+            </div>
           </div>
         </div>
       </div>
+      {showDiff && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDiff(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">変更アイテム一覧</h3>
+              <button
+                onClick={() => setShowDiff(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="whitespace-pre-wrap font-mono text-sm text-gray-700">
+              {diffContent}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-3xl mx-auto p-6">
         <div className="space-y-2">
-          {sortedAndFilteredItems.map((item, i) => {
+          {filteredItems.map((item, i) => {
             const info = item["基本情報"];
             const isSelected = selectedItem === item;
             return (
