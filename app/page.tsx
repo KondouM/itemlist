@@ -57,6 +57,7 @@ export default function Home() {
   const [news, setNews] = useState<{ date: string; content: string }[]>([]);
   const [showDiff, setShowDiff] = useState(false);
   const [diffContent, setDiffContent] = useState<string>('');
+  const [latestUpdate, setLatestUpdate] = useState('');
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -117,6 +118,16 @@ export default function Home() {
         console.error('お知らせの読み込みエラー:', err);
         setNews([]);
       });
+
+    fetch('/news.txt')
+      .then(response => response.text())
+      .then(text => {
+        const lines = text.split('\n');
+        const firstLine = lines[0];
+        const date = firstLine.split(':')[0];
+        setLatestUpdate(date);
+      })
+      .catch(error => console.error('Error loading news:', error));
   }, []);
 
   const suggestions = items
@@ -139,7 +150,7 @@ export default function Home() {
               <span className="text-red-600 font-semibold">Lv1000以上</span>のアイテムは赤色で表示
             </span>
             <div className="flex items-center gap-2 ml-auto relative">
-              <span className="text-sm text-gray-500">最終更新: 2024/05/24</span>
+              <span className="text-sm text-gray-500">最終更新: {latestUpdate}</span>
               <button
                 onClick={() => setShowNews(!showNews)}
                 className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
