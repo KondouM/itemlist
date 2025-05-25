@@ -11,6 +11,7 @@ interface ItemInfo {
   攻撃速度: string;
   価格: number;
   ドロップレベル: number;
+  種類: string;
 }
 
 interface ItemStats {
@@ -49,6 +50,7 @@ function cleanItemName(name: string) {
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
   const [query, setQuery] = useState('');
+  const [typeQuery, setTypeQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -138,8 +140,13 @@ export default function Home() {
   const filteredItems = items
     ?.filter(item => {
       const info = item["基本情報"];
-      return cleanItemName(info["名前"]).includes(query);
+      const nameMatch = cleanItemName(info["名前"]).includes(query);
+      const typeMatch = typeQuery === '' || info["種類"] === typeQuery;
+      return nameMatch && typeMatch;
     }) || [];
+
+  // 種類の一覧を取得
+  const itemTypes = Array.from(new Set(items.map(item => item["基本情報"]["種類"]))).sort();
 
   return (
     <main className="min-h-screen bg-gray-100">
@@ -222,6 +229,18 @@ export default function Home() {
                 </div>
               )}
             </div>
+            <select
+              value={typeQuery}
+              onChange={(e) => setTypeQuery(e.target.value)}
+              className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white"
+            >
+              <option value="">すべての種類</option>
+              {itemTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => {
