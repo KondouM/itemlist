@@ -27,7 +27,7 @@ interface ItemStats {
 interface Item {
   基本情報: ItemInfo;
   要求ステータス: ItemStats;
-  アイテム情報: string[];
+  作成時特性: string[];
   ユニーク情報: string[];
 }
 
@@ -82,22 +82,22 @@ export default function Home() {
         return res.arrayBuffer().then(buffer => {
           try {
             const sjisText = sjisToUtf8(new Uint8Array(buffer));
-            return JSON.parse(sjisText);
+            const data = JSON.parse(sjisText);
+            const itemList = data["アイテム一覧"] || [];
+            if (!Array.isArray(itemList)) {
+              throw new Error('アイテムデータの形式が不正です');
+            }
+            setItems(itemList);
           } catch (e) {
             console.error('JSONパースエラー:', e);
             throw new Error('JSONデータの解析に失敗しました');
           }
         });
       })
-      .then(data => {
-        console.log('読み込んだデータ:', data);
-        const itemList = data["アイテム一覧"] || [];
-        console.log('アイテム数:', itemList.length);
-        setItems(itemList);
-      })
       .catch(err => {
         console.error('エラー:', err);
         setError(err.message);
+        setItems([]); // エラー時は空配列を設定
       })
       .finally(() => {
         setLoading(false);
@@ -131,14 +131,15 @@ export default function Home() {
   }, []);
 
   const suggestions = items
-    .map(item => cleanItemName(item["基本情報"]["名前"]))
-    .filter(name => name.includes(query))
-    .slice(0, 5);
+    ?.map(item => cleanItemName(item["基本情報"]["名前"]))
+    ?.filter(name => name.includes(query))
+    ?.slice(0, 5) || [];
 
-  const filteredItems = items.filter(item => {
-    const info = item["基本情報"];
-    return cleanItemName(info["名前"]).includes(query);
-  });
+  const filteredItems = items
+    ?.filter(item => {
+      const info = item["基本情報"];
+      return cleanItemName(info["名前"]).includes(query);
+    }) || [];
 
   return (
     <main className="min-h-screen bg-gray-100">
@@ -174,7 +175,7 @@ export default function Home() {
                     </button>
                   </div>
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {news && news.length > 0 ? (
+                    {news?.length > 0 ? (
                       news.map((item, index) => (
                         <div key={index} className="p-3 bg-blue-50 rounded-lg">
                           <p className="text-sm text-gray-600">{item.date}</p>
@@ -356,7 +357,7 @@ export default function Home() {
                     <div className="mt-4">
                       <h3 className="text-lg font-semibold text-gray-800 mb-2">アイテム情報</h3>
                       <ul className="space-y-1 text-gray-600">
-                        {item["アイテム情報"].map((line, idx) => (
+                        {item["作成時特性"]?.map((line, idx) => (
                           <li key={idx} className="flex items-start">
                             <span className="text-blue-500 mr-2">•</span>
                             {line.replace(/\u0001|\u0002/g, "")}
@@ -364,11 +365,11 @@ export default function Home() {
                         ))}
                       </ul>
                     </div>
-                    {item["ユニーク情報"] && item["ユニーク情報"].length > 0 && (
+                    {item["ユニーク情報"]?.length > 0 && (
                       <div className="mt-4">
                         <h3 className="text-lg font-semibold text-purple-800 mb-2">ユニーク情報</h3>
                         <ul className="space-y-1 text-purple-600">
-                          {item["ユニーク情報"].map((line, idx) => (
+                          {item["ユニーク情報"]?.map((line, idx) => (
                             <li key={idx} className="flex items-start">
                               <span className="text-purple-500 mr-2">•</span>
                               {line.replace(/\u0001|\u0002/g, "")}
